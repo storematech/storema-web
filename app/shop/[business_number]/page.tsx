@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation'
 const StorePage = () => {
   const params = useParams()
 
-  console.log("params",params)
   return (
     <div>
       <Store params={params}/>

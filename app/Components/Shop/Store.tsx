@@ -3,21 +3,18 @@ import { useState, useEffect } from "react";
 
 import {
   collection,
-  addDoc,
-  getDoc,
-  QuerySnapshot,
   query,
   onSnapshot,
-  deleteDoc,
-  doc
+  
 } from "firebase/firestore";
 import { db } from "@/config/config";
-interface StoreInterface{
-  business_name:string,
-  business_type:string
+import Categories from "./Categories";
+interface StoreInterface {
+  business_name: string,
+  business_type: string
 }
 
-export default function Store({params}:{params:{business_number:string|null}}) {
+export default function Store({ params }: { params: { business_number: string | null } }) {
   const [store, setStore] = useState<StoreInterface[]>([])
 
   useEffect(() => {
@@ -25,27 +22,27 @@ export default function Store({params}:{params:{business_number:string|null}}) {
 
     const q = query(collection(db, collectionName));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let storeArr:any = [];
+      let storeArr: any = [];
       querySnapshot.forEach((doc) => {
-        console.log("doc", doc)
         storeArr.push({ ...doc.data(), id: doc.id });
       });
       setStore(storeArr);
       console.log("store data", storeArr)
-      console.log("buinsess page", params)
       return () => unsubscribe()
     });
   }, []);
 
   return (
     <main>
-      store page
+      <h1>      store page
+      </h1>
       {store.length > 0 && (
-      <div>
-        <h1>{store[0].business_name}</h1>
-        <p>{store[0].business_type}</p>
-      </div>
-    )}
+        <div>
+          <h1>{store[0].business_name}</h1>
+          <p>{store[0].business_type}</p>
+          <Categories params={params}/>
+        </div>
+      )}
     </main>
 
   )
