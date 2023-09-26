@@ -11,10 +11,11 @@ import {
   doc
 } from "firebase/firestore";
 import { db } from "@/config/config";
-interface BusinessInterface{
-  business_name:string,
-  business_type:string
+interface BusinessInterface {
+  business_name: string,
+  business_type: string
 }
+import Link from "next/link";
 
 export default function Home() {
   const [business, setBusiness] = useState<BusinessInterface[]>([])
@@ -22,7 +23,7 @@ export default function Home() {
   useEffect(() => {
     const q = query(collection(db, "_6006413187_business"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let businessArr:any = [];
+      let businessArr: any = [];
       querySnapshot.forEach((doc) => {
         console.log("doc", doc)
         businessArr.push({ ...doc.data(), id: doc.id });
@@ -36,12 +37,7 @@ export default function Home() {
   return (
     <main>
       home page
-      {business.length > 0 && (
-      <div>
-        <h1>{business[0].business_name}</h1>
-        <p>{business[0].business_type}</p>
-      </div>
-    )}
+      
     </main>
 
   )
