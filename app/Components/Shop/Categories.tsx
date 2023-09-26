@@ -9,11 +9,11 @@ import {
 
 } from "firebase/firestore";
 import { db } from "@/config/config";
-
-interface ItemInterface {
+import Link from "next/link";
+export interface ItemInterface {
     id: string,
     item_name: string,
-    item_category_text: string
+    item_category_text?: string,
 }
 export default function Categories({ params }: { params: { business_number: string | null } }) {
 
@@ -29,7 +29,7 @@ export default function Categories({ params }: { params: { business_number: stri
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             querySnapshot.forEach((doc) => {
                 const itemData = { ...doc.data(), id: doc.id };
-                const category = itemData.item_category_text;
+                const category = itemData.item_category_text || "Uncategorized";
                 console.log("cateogry", category, itemData)
                 if (!itemsOfCategoryMap[category]) {
                     itemsOfCategoryMap[category] = []
@@ -46,9 +46,10 @@ export default function Categories({ params }: { params: { business_number: stri
             {Object.keys(itemsOfCategory).map((category: string, index: number) => (
                 <div key={index}>
                     <h2 className="text-3xl">{category}</h2>
-                    {itemsOfCategory[category].map((item:ItemInterface, index) => (
+                    {itemsOfCategory[category].map((item: ItemInterface, index) => (
                         <div key={index}>
-                            <h3>{item.item_name}</h3>
+                            <Link href={ `/shop/${params.business_number}/item/${item.id}`}>                            <h3>{item.item_name}</h3>
+                            </Link>
                         </div>
                     ))}
 
