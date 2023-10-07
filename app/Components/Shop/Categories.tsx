@@ -15,35 +15,35 @@ export interface ItemInterface {
     item_name: string,
     item_category_text?: string,
 }
-export default function Categories({ params }: { params: { business_number: string | null } }) {
+export default function Categories({ params }: { params: { store_name: string | null } }) {
 
     const [itemsOfCategory, setItemsOfCategory] = useState<{ [key: string]: ItemInterface[] }>({})
 
-    useEffect(() => {
-        // map to store items of a category
-        const itemsOfCategoryMap: { [key: string]: ItemInterface[] } = {}
+    // useEffect(() => {
+    //     // map to store items of a category
+    //     const itemsOfCategoryMap: { [key: string]: ItemInterface[] } = {}
 
-        const collectionName = `_${params.business_number}_items`;
+    //     const collectionName = `_${params.business_number}_items`;
 
-        const q = query(collection(db, collectionName));
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const itemData = { ...doc.data(), id: doc.id };
-                const category = itemData.item_category_text || "Uncategorized";
-                console.log("cateogry", category, itemData)
-                if (!itemsOfCategoryMap[category]) {
-                    itemsOfCategoryMap[category] = []
-                }
-                itemsOfCategoryMap[category].push(itemData)
-            });
-            setItemsOfCategory(itemsOfCategoryMap)
-            console.log("itemsOfCategoryMap", itemsOfCategoryMap, itemsOfCategory)
-            return () => unsubscribe()
-        });
-    }, [params.business_number]);
+    //     const q = query(collection(db, collectionName));
+    //     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    //         querySnapshot.forEach((doc) => { 
+    //             const itemData = { ...doc.data(), id: doc.id };
+    //             const category = itemData.item_category_text || "Uncategorized";
+    //             console.log("cateogry", category, itemData)
+    //             if (!itemsOfCategoryMap[category]) {
+    //                 itemsOfCategoryMap[category] = []
+    //             }
+    //             itemsOfCategoryMap[category].push(itemData)
+    //         });
+    //         setItemsOfCategory(itemsOfCategoryMap)
+    //         console.log("itemsOfCategoryMap", itemsOfCategoryMap, itemsOfCategory)
+    //         return () => unsubscribe()
+    //     });
+    // }, [params.business_number]);
     return (
         <div>
-            {Object.keys(itemsOfCategory).map((category: string, index: number) => (
+            {/* {Object.keys(itemsOfCategory).map((category: string, index: number) => (
                 <div key={index}>
                     <h2 className="text-3xl">{category}</h2>
                     {itemsOfCategory[category].map((item: ItemInterface, index) => (
@@ -54,7 +54,7 @@ export default function Categories({ params }: { params: { business_number: stri
                     ))}
 
                 </div>
-            ))}
+            ))} */}
 
         </div>
     )

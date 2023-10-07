@@ -9,7 +9,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: ""
+        hostname: "cdn.w600.comps.canstockphoto.com"
       },
       
     ],
