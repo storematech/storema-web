@@ -1,6 +1,11 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp,getApps } from "firebase/app";
+// import { initializeApp,getApps } from "firebase/app";
+// import { getFirestore } from "firebase/firestore";
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 import { getFirestore } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -18,6 +23,17 @@ appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
-export const firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// export const firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-export const db = getFirestore(firebase_app)
+// export const db = getFirestore(firebase_app)
+
+// const firebaseApp = firebase.initializeApp(firebaseConfig);
+// const db = firebaseApp.firestore;
+
+
+// export default db; 
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore();
+export { db };
+

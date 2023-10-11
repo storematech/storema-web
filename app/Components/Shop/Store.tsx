@@ -1,77 +1,81 @@
 import { useState, useEffect } from "react";
-import { collection, query, onSnapshot, where, doc, getDoc, QuerySnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, where, doc, getDoc, QuerySnapshot, Firestore, collectionGroup, getDocs, DocumentReference } from "firebase/firestore";
 import { db } from "@/config/config";
 import Image from "next/image";
-import Categories from "./Categories";
+import Product from "./Product";
+import { StoreInterface } from "@/models/Store";
+import { ProductInterface } from "@/models/Product";
 
-interface StoreInterface {
-  name: string;
-  "profile-picture-url": string;
-  products: string[]; // an array of product references in store doc
-}
-
-export default function Store({
-  params,
-}: {
-  params: { store_name: string | null };
-}) {
+export default function Store({store_id}:{store_id:string}) {
   const [store, setStore] = useState<StoreInterface | null>(null);
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductInterface[] | null>(null);
+  const [productId, setProductId] = useState<string | null>(null);
+
+  const storeUniqueId: string = store_id
+
 
   useEffect(() => {
-    if (params.store_name) {
-      // const storeId = decodeURIComponent(params.store_name).toLowerCase()
-      // console.log("storeId",storeId)
-      // const storeIdQuery = query(collection(db, "store-unix-id"), where("id", "==", storeId));
 
-      // const unsubscribeStore =onSnapshot(storeIdQuery,(querySnapshot)=>{
-      //   querySnapshot.forEach((storeIdDoc)=>{
-      //     const storeIdData =storeIdDoc.data()
-      //     console.log("storeId data",storeIdData)
-      //   })
-      // })
+    console.log("storeUniqueId", storeUniqueId)
 
-      // console.log("storeId params", storeId)
-      // const storeIdQuery = query(collection(db, "store-unix-id"), where("id", "==", "Store-Test-1"));
-      // console.log("storeIdQuery", storeIdQuery)
+    async function getStoreDataByStoreUniqueId(storeUniqueId: string | null) {
+      const storeUniqueIDCollection = collection(db, "store-unique-id");
+      const storeUniqueIDQuery = query(storeUniqueIDCollection, where("unique-id", "==", storeUniqueId));
 
-      const storeName = decodeURIComponent(params.store_name)
-      console.log("storename",storeName)
+      const unsubscribe = onSnapshot(storeUniqueIDQuery, (querySnapshot) => {
+        querySnapshot.forEach(async (storeIdDoc) => {
+          console.log("storeId doc", storeIdDoc);
 
-      const storeQuery = query(collection(db, "store"), where("name", "==", storeName));
+          // Access the ref property of the "store" field in the "store-unique-id" document
+          const storeRef = storeIdDoc.get("store");
+          console.log("storeRef", storeRef);
 
-      const unsubscribeStore = onSnapshot(storeQuery, (querySnapshot) => {
-        querySnapshot.forEach(async (storeDoc) => {
-          const storeData = storeDoc.data() as StoreInterface;
-          console.log("store data", storeData);
-          const productRefs = storeData.products;
-          console.log("productsRef", productRefs);
+          // Use storeRef to get the document in the "store" collection
+          const storeDoc = await getDoc(storeRef);
 
-          // Create an array of promises for fetching product data
-          const productDataPromises = productRefs.map(async (productRef) => {
-            // Construct the reference to the product document
-            console.log("productRef",productRef,productRef.id)
-            const productDocRef = doc(db, "product", productRef.id);
-            const productDocSnap = await getDoc(productDocRef);
-            const productData = productDocSnap.data();
-            console.log("product data", productData); // Log the product data here
-            return productData;
-          });
+          if (storeDoc.exists()) {
+            const storeData = storeDoc.data() as StoreInterface;
+            console.log("storeDoc data", storeData);
+            setStore(storeData);
 
-          // Wait for all product data promises to resolve
-          const productData = await Promise.all(productDataPromises);
-          console.log("last product data", productData);
+            const productsCollection = collection(db, "product");
+            const productsQuery = query(productsCollection, where("store", "==", storeRef));
+            console.log("productsQuery", productsQuery)
 
-          setStore({ ...storeData, id: storeDoc.id });
-          setProducts(productData);
+            const productSnapshot = await getDocs(productsQuery);
+            console.log("productSnapshot", productSnapshot, productSnapshot.empty)
+
+            if (!productSnapshot.empty) {
+              const productData = productSnapshot.docs.map((productDoc) => {
+
+                const productData = productDoc.data() as ProductInterface;
+                productData.id=productDoc.id
+              console.log("store component",productData)
+
+                return productData;
+              });
+              console.log("Products associated with the store:", productData);
+              setProducts(productData);
+            } else {
+              console.log("No products found for this store.");
+            }
+
+          } else {
+            console.log("Store document not found.");
+          }
         });
       });
-
       return () => {
-        unsubscribeStore();
+        // Unsubscribe from the snapshot listener when the component unmounts
+        unsubscribe();
       };
     }
-  }, [params.store_name]);
+
+    getStoreDataByStoreUniqueId(storeUniqueId);
+
+
+  }, []);
+
 
   return (
     <main>
@@ -80,22 +84,22 @@ export default function Store({
         <div>
           <h1>{store.name}</h1>
           <Image
-            src={store["profile-picture-url"]}
-            alt={`${store.name} profile picture`}
+            src={store["logo-url"]}
+            alt={`${store.name} logo`}
             width={100}
             height={100}
           />
-          {/* <Categories params={params} /> */}
         </div>
       )}
-      {products.length > 0 && (
+      
+      {products && (
         <div>
           <h2>Products</h2>
-          <ul>
-            {products.map((product, index) => (
-              <li key={index}>{product.name}</li>
-            ))}
-          </ul>
+          {products.map((product: ProductInterface, index: number) => (
+            <div key={index}>
+              <Product product={product} storeUniqueId={storeUniqueId} />
+            </div>
+          ))}
         </div>
       )}
     </main>
